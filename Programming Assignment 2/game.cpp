@@ -73,6 +73,23 @@ void Game::processEvents()
 			{
 				m_exitGame = true;
 			}
+
+			if (sf::Keyboard::Up == event.key.code)
+			{
+				m_player.move(direction::up);
+			}
+			if (sf::Keyboard::Down == event.key.code)
+			{
+				m_player.move(direction::down);
+			}
+			if (sf::Keyboard::Left == event.key.code)
+			{
+				m_player.move(direction::left);
+			}
+			if (sf::Keyboard::Right == event.key.code)
+			{
+				m_player.move(direction::right);
+			}
 		}
 	}
 }
@@ -108,8 +125,32 @@ void Game::setupSprites()
 ///</summary>
 void Game::setupObjects()
 {
+	// Set up maze array
+	for (int i = 0; i < NUM_ROWS; i++)
+	{
+		for (int j = 0; j < NUM_COLS; j++)
+		{
+			if (gameMap[i][j] == 1)
+			{
+				maze[i][j].setType(cellType::wall);
+			}
+			else if (gameMap[i][j] == 2)
+			{
+				maze[i][j].setType(cellType::pellet);
+			}
+			else
+			{
+				maze[i][j].setType(cellType::null);
+			}
+		}
+	}
+
 	wall.setSize({ 40.0f,40.0f });
 	wall.setFillColor(sf::Color::Blue);
+
+	pellet.setRadius(4.0f);
+	pellet.setOrigin({ -18.0f,-18.0f });
+	pellet.setFillColor(sf::Color::White);
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -123,6 +164,8 @@ void Game::update(sf::Time t_deltaTime)
 	{
 		m_window.close();
 	}
+
+	m_player.update();
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -137,13 +180,20 @@ void Game::render()
 	{
 		for (int j = 0; j < NUM_COLS; j++)
 		{
-			if (gameMap[i][j] == 1)
+			if (maze[i][j].getType() == cellType::wall)
 			{
 				wall.setPosition({ j*40.0f, i*40.0f });
 				m_window.draw(wall);
 			}
+			else if (maze[i][j].getType() == cellType::pellet)
+			{	
+				pellet.setPosition({ j*40.0f,i*40.0f });
+				m_window.draw(pellet);
+			}
 		}
 	}
+
+	m_player.draw(m_window);
 
 	m_window.display();
 }
