@@ -108,7 +108,8 @@ void Game::setupSprites()
 ///</summary>
 void Game::setupObjects()
 {
-	
+	wall.setSize({ 40.0f,40.0f });
+	wall.setFillColor(sf::Color::Blue);
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -131,6 +132,18 @@ void Game::update(sf::Time t_deltaTime)
 void Game::render()
 {
 	m_window.clear(sf::Color::Black);
+
+	for (int i = 0; i < NUM_ROWS; i++)
+	{
+		for (int j = 0; j < NUM_COLS; j++)
+		{
+			if (gameMap[i][j] == 1)
+			{
+				wall.setPosition({ j*40.0f, i*40.0f });
+				m_window.draw(wall);
+			}
+		}
+	}
 
 	m_window.display();
 }
