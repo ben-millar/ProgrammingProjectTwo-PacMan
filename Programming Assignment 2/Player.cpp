@@ -4,9 +4,9 @@
 
 Player::Player()
 {
-	body.setRadius(20.0f);
+	body.setRadius(CELL_SIZE.x/2.0f);
 	body.setFillColor(sf::Color::Yellow);
-	body.setOrigin(20.0f, 20.0f);
+	body.setOrigin(CELL_SIZE.x / 2.0f, CELL_SIZE.x / 2.0f);
 
 	moveSpeed = 1.5f;
 	moveDirection = direction::null;
@@ -19,7 +19,7 @@ Player::~Player()
 
 void Player::update()
 {
-	currentCell = { int(body.getPosition().x / 40), int(body.getPosition().y / 40) };
+	currentCell = { int(body.getPosition().x / CELL_SIZE.x), int(body.getPosition().y / CELL_SIZE.y) };
 
 	switch (moveDirection)
 	{
@@ -68,5 +68,5 @@ void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 void Player::hitWall()
 {
 	// set player position to center of their current cell
-	body.setPosition({ (currentCell.x * 40.0f) + 20.0f, (currentCell.y * 40.0f) + 20.0f });
+	body.setPosition({ (currentCell.x * CELL_SIZE.x) + body.getRadius() , (currentCell.y * CELL_SIZE.y) + body.getRadius() });
 }

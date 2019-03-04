@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "Cell.h"
+#include "GLOBALS.h"
 enum class direction
 {
 	up,

@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClInclude Include="Cell.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="GLOBALS.h" />
     <ClInclude Include="MyVector3.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>

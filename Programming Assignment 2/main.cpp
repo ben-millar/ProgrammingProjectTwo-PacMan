@@ -5,7 +5,8 @@
 /// Session 1 Start: 18:45 End: 19:45
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
-/// Session 4 Start: 14:30 End: 15:30 TOTAL TIME: 5:00
+/// Session 4 Start: 14:30 End: 15:30 
+/// Session 5 Start: 16:45 End: 17:10 TOTAL TIME: 5:25
 /// </summary>
 
 #ifdef _DEBUG 

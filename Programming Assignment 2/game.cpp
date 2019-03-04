@@ -5,10 +5,12 @@
 /// Session 1 Start: 18:45 End: 19:45
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
-/// Session 4 Start: 14:30 End: 15:30 TOTAL TIME: 5:00
+/// Session 4 Start: 14:30 End: 15:30 
+/// Session 5 Start: 16:45 End: 17:10 TOTAL TIME: 5:25
 /// </summary>
 
 #include "game.h"
+#include "GLOBALS.h"
 #include <iostream>
 
 
@@ -17,7 +19,7 @@
 /// pass parameters for sfml window, setup m_exitGame
 /// </summary>
 Game::Game() :
-	m_window{ sf::VideoMode{ 800, 800, 32 }, "SFML Game" },
+	m_window{ sf::VideoMode{ SCREEN_SIZE.x, SCREEN_SIZE.y, 32 }, "SFML Game" },
 	m_exitGame{ false } //when true game will exit
 {
 	currentState = gameState::menu;
@@ -195,14 +197,14 @@ void Game::setupObjects()
 		}
 	}
 
-	wall.setSize({ 40.0f,40.0f });
+	wall.setSize(CELL_SIZE);
 	wall.setFillColor(sf::Color::Blue);
 
 	pellet.setRadius(4.0f);
-	pellet.setOrigin({ -18.0f,-18.0f });
+	pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
 	pellet.setFillColor(sf::Color::White);
 
-	m_player.setPosition({ 60.0f, 60.0f });
+	m_player.setPosition({ CELL_SIZE.x * 1.5f, CELL_SIZE.y * 1.5f });
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -285,7 +287,7 @@ void Game::render()
 					if (maze[i][j].getType() == cellType::wall)
 					{
 						// set wall position
-						wall.setPosition({ j*40.0f, i*40.0f });
+						wall.setPosition({ j*CELL_SIZE.x, i*CELL_SIZE.y });
 						// check if player colliding
 						if (m_player.getBounds().intersects(wall.getGlobalBounds()))
 						{
@@ -297,7 +299,7 @@ void Game::render()
 					else if (maze[i][j].getType() == cellType::pellet)
 					{
 						// set pellet position
-						pellet.setPosition({ j*40.0f,i*40.0f });
+						pellet.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
 						// check if player colliding
 						if (m_player.getBounds().intersects(pellet.getGlobalBounds()))
 						{
