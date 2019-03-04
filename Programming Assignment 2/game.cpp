@@ -74,21 +74,36 @@ void Game::processEvents()
 				m_exitGame = true;
 			}
 
-			if (sf::Keyboard::Up == event.key.code)
+			switch (currentState)
 			{
-				m_player.move(direction::up);
-			}
-			if (sf::Keyboard::Down == event.key.code)
-			{
-				m_player.move(direction::down);
-			}
-			if (sf::Keyboard::Left == event.key.code)
-			{
-				m_player.move(direction::left);
-			}
-			if (sf::Keyboard::Right == event.key.code)
-			{
-				m_player.move(direction::right);
+			case gameState::menu:
+				break;
+
+			case gameState::gameplay:
+				switch (event.key.code)
+				{
+				case sf::Keyboard::Up:
+					m_player.changeDirection(direction::up, maze);
+					break;
+				case sf::Keyboard::Down:
+					m_player.changeDirection(direction::down, maze);
+					break;
+				case sf::Keyboard::Left:
+					m_player.changeDirection(direction::left, maze);
+					break;
+				case sf::Keyboard::Right:
+					m_player.changeDirection(direction::right, maze);
+					break;
+				default:
+					break;
+				}
+				break;
+
+			case gameState::gameover:
+				break;
+
+			default:
+				break;
 			}
 		}
 	}
@@ -151,6 +166,8 @@ void Game::setupObjects()
 	pellet.setRadius(4.0f);
 	pellet.setOrigin({ -18.0f,-18.0f });
 	pellet.setFillColor(sf::Color::White);
+
+	m_player.setPosition({ 60.0f, 60.0f });
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -165,7 +182,18 @@ void Game::update(sf::Time t_deltaTime)
 		m_window.close();
 	}
 
-	m_player.update();
+	switch(currentState)
+	{
+	case gameState::menu:
+		break;
+	case gameState::gameplay:
+		m_player.update();
+		break;
+	case gameState::gameover:
+		break;
+	default:
+		break;
+	}
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -176,24 +204,54 @@ void Game::render()
 {
 	m_window.clear(sf::Color::Black);
 
-	for (int i = 0; i < NUM_ROWS; i++)
+	switch(currentState)
 	{
-		for (int j = 0; j < NUM_COLS; j++)
-		{
-			if (maze[i][j].getType() == cellType::wall)
-			{
-				wall.setPosition({ j*40.0f, i*40.0f });
-				m_window.draw(wall);
-			}
-			else if (maze[i][j].getType() == cellType::pellet)
-			{	
-				pellet.setPosition({ j*40.0f,i*40.0f });
-				m_window.draw(pellet);
-			}
-		}
-	}
+		case gameState::menu:
+			break;
 
-	m_player.draw(m_window);
+		case gameState::gameplay:
+			for (int i = 0; i < NUM_ROWS; i++) // for all rows
+			{
+				for (int j = 0; j < NUM_COLS; j++) // for all columns
+				{
+					// if cell type is wall
+					if (maze[i][j].getType() == cellType::wall)
+					{
+						// set wall position
+						wall.setPosition({ j*40.0f, i*40.0f });
+						// check if player colliding
+						if (m_player.getBounds().intersects(wall.getGlobalBounds()))
+						{
+							m_player.hitWall(); // tell player hit wall
+						}
+						m_window.draw(wall); // draw to screen
+					}
+					// if cell type is pellet
+					else if (maze[i][j].getType() == cellType::pellet)
+					{
+						// set pellet position
+						pellet.setPosition({ j*40.0f,i*40.0f });
+						// check if player colliding
+						if (m_player.getBounds().intersects(pellet.getGlobalBounds()))
+						{
+							maze[i][j].setType(cellType::null); // remove pellet
+						}
+						m_window.draw(pellet); // draw to screen
+					}
+				} // end inner for
+			} // end outer for
+
+			m_player.draw(m_window); // draw player
+			break;
+
+		case gameState::gameover:
+			break;
+
+		default:
+			break;
+	} // end switch
+
+	
 
 	m_window.display();
 }

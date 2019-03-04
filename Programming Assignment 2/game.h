@@ -15,6 +15,13 @@
 #include "Cell.h"
 #include "Player.h"
 
+enum class gameState
+{
+	menu,
+	gameplay,
+	gameover
+};
+
 class Game
 {
 public:
@@ -70,6 +77,8 @@ private:
 
 	// ++++++++++ Objects ++++++++++
 	sf::RenderWindow m_window; // main SFML window
+
+	gameState currentState;
 
 	sf::Font m_ArialBlackfont;
 	Player m_player;
