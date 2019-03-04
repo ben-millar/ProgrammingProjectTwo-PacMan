@@ -20,7 +20,7 @@ Player::~Player()
 void Player::update()
 {
 	currentCell = { int(body.getPosition().x / 40), int(body.getPosition().y / 40) };
-	std::cout << "X: " << currentCell.x << "Y: " << currentCell.y << std::endl;
+
 	switch (moveDirection)
 	{
 	case direction::up:

@@ -3,6 +3,9 @@
 /// Date: 01/03/2019
 /// Estimated time to complete: 12 hours
 /// Session 1 Start: 18:45 End: 19:45
+/// Session 2 Start: 18:00 End: 19:30
+/// Session 3 Start: 09:30 End: 11:00
+/// Session 4 Start: 14:30 End: 15:30 TOTAL TIME: 5:00
 /// </summary>
 
 #pragma once
@@ -39,6 +42,7 @@ private:
 	void setupSounds(); // set up all sounds
 	void setupObjects(); // set up all sfml objects
 	void setupSprites(); // set up all images
+	void inputText(sf::Event t_event, std::string & t_string, unsigned t_maxChars); // takes input from keyboard and assigns to string
 	void update(sf::Time t_deltaTime); // main update method
 	void render(); // renders framebuffer
 
@@ -73,6 +77,8 @@ private:
 	1,2,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,1,
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 };
 
+	std::string m_playerNameString;
+
 	// +++++++++++++++++++++++++++++
 
 	// ++++++++++ Objects ++++++++++
@@ -81,6 +87,9 @@ private:
 	gameState currentState;
 
 	sf::Font m_ArialBlackfont;
+	sf::Text m_instructionsText;
+	sf::Text m_playerNameText;
+
 	Player m_player;
 
 	sf::RectangleShape wall;

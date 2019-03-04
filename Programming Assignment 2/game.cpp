@@ -1,8 +1,11 @@
 /// <summary>
 /// Author: Ben Millar – C00236772
-/// Date:
-/// Estimated time to complete:
-/// Session 1 Start: End:
+/// Date: 01/03/2019
+/// Estimated time to complete: 12 hours
+/// Session 1 Start: 18:45 End: 19:45
+/// Session 2 Start: 18:00 End: 19:30
+/// Session 3 Start: 09:30 End: 11:00
+/// Session 4 Start: 14:30 End: 15:30 TOTAL TIME: 5:00
 /// </summary>
 
 #include "game.h"
@@ -17,6 +20,7 @@ Game::Game() :
 	m_window{ sf::VideoMode{ 800, 800, 32 }, "SFML Game" },
 	m_exitGame{ false } //when true game will exit
 {
+	currentState = gameState::menu;
 	setupFontAndText(); // load font 
 	setupObjects(); // set sfml object parameters
 	setupSprites(); // load and setup textures
@@ -73,13 +77,33 @@ void Game::processEvents()
 			{
 				m_exitGame = true;
 			}
+		}
 
-			switch (currentState)
+		switch (currentState)
+		{
+		case gameState::menu:
+
+			// proceed to gameplay when they press enter
+			if (sf::Event::KeyPressed == event.type)
 			{
-			case gameState::menu:
-				break;
+				if (sf::Keyboard::Enter == event.key.code)
+				{
+					currentState = gameState::gameplay;
+				}
+			}
 
-			case gameState::gameplay:
+			// take player input
+			if (sf::Event::TextEntered == event.type)
+			{
+				inputText(event, m_playerNameString, 16);
+			}
+			
+			break;
+
+		case gameState::gameplay:
+
+			if (sf::Event::KeyPressed == event.type)
+			{
 				switch (event.key.code)
 				{
 				case sf::Keyboard::Up:
@@ -95,15 +119,15 @@ void Game::processEvents()
 					m_player.changeDirection(direction::right, maze);
 					break;
 				default:
-					break;
+					break; // break out of KeyPress event
 				}
-				break;
+			break; // break out of gameplay
 
-			case gameState::gameover:
-				break;
+		case gameState::gameover:
+			break;
 
-			default:
-				break;
+		default:
+			break;
 			}
 		}
 	}
@@ -118,6 +142,18 @@ void Game::setupFontAndText()
 	{
 		std::cout << "problem loading arial black font" << std::endl;
 	}
+
+	m_instructionsText.setFont(m_ArialBlackfont);
+	m_instructionsText.setPosition({ 175.0f,200.0f });
+	m_instructionsText.setFillColor(sf::Color::White);
+	m_instructionsText.setCharacterSize(26U);
+	m_instructionsText.setString("Please enter your name below:");
+
+	m_playerNameText.setFont(m_ArialBlackfont);
+	m_playerNameText.setPosition({ 250.0f, 400.0f });
+	m_playerNameText.setFillColor(sf::Color::White);
+	m_playerNameText.setCharacterSize(36U);
+	m_playerNameText.setString("");
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -133,7 +169,6 @@ void Game::setupSprites()
 
 }
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ///<summary>
 /// sets up attributes for all SFML objects
@@ -172,6 +207,35 @@ void Game::setupObjects()
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /// <summary>
+/// This functions accepts a user keyPress event and a string, 
+/// and will concatonate onto the string any text the user enters
+/// </summary>
+/// <param name="t_event">User keyPress event</param>
+/// <param name="t_string">String to be appended</param>
+/// <param name="t_maxChars">Character limit for string</param>
+void Game::inputText(sf::Event t_event, std::string & t_string, unsigned t_maxChars)
+{
+	// if user types backspace
+	if (t_event.text.unicode == 8) 
+	{
+		// and string is longer than 0 characters
+		if (t_string.length() > 0) 
+		{
+			// erase the last element in the string
+			t_string.erase(t_string.length()-1); 
+		}
+	}
+	// otherwise, if not backspace, and string not full
+	else if (t_string.length() < t_maxChars)
+	{
+		// append unicode char typed to string
+		t_string += t_event.text.unicode; 
+	}
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
 /// Update the game world
 /// </summary>
 /// <param name="t_deltaTime">time interval per frame</param>
@@ -207,6 +271,9 @@ void Game::render()
 	switch(currentState)
 	{
 		case gameState::menu:
+			m_window.draw(m_instructionsText);
+			m_playerNameText.setString(m_playerNameString);
+			m_window.draw(m_playerNameText);
 			break;
 
 		case gameState::gameplay:
