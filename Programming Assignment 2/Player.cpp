@@ -2,8 +2,21 @@
 #include <iostream>
 
 
+void Player::setupSprite()
+{
+	if (!m_texture.loadFromFile("ASSETS\\IMAGES\\pacmanSprite.png"))
+	{
+		// error message
+	}
+
+	m_sprite.setTexture(m_texture);
+	m_sprite.setOrigin({ 16.0f,16.0f });
+}
+
 Player::Player()
 {
+	setupSprite();
+
 	body.setRadius(CELL_SIZE.x/2.0f);
 	body.setFillColor(sf::Color::Yellow);
 	body.setOrigin(CELL_SIZE.x / 2.0f, CELL_SIZE.x / 2.0f);
