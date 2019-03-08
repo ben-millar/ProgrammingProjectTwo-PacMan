@@ -13,7 +13,6 @@
 #include "GLOBALS.h"
 #include <iostream>
 
-
 /// <summary>
 /// default construcor
 /// pass parameters for sfml window, setup m_exitGame
@@ -81,9 +80,10 @@ void Game::processEvents()
 			}
 		}
 
+		// ++++++++ Checks gamestate and takes keyboard events as required ++++++++
 		switch (currentState)
 		{
-		case gameState::menu:
+		case gameState::menu: // ++++++++ MENU ++++++++
 
 			// proceed to gameplay when they press enter
 			if (sf::Event::KeyPressed == event.type)
@@ -102,7 +102,7 @@ void Game::processEvents()
 			
 			break;
 
-		case gameState::gameplay:
+		case gameState::gameplay: // ++++++++ GAMEPLAY ++++++++
 
 			if (sf::Event::KeyPressed == event.type)
 			{
@@ -125,7 +125,7 @@ void Game::processEvents()
 				}
 			break; // break out of gameplay
 
-		case gameState::gameover:
+		case gameState::gameover: // ++++++++ GAME OVER ++++++++
 			break;
 
 		default:
