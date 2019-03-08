@@ -6,7 +6,8 @@
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
 /// Session 4 Start: 14:30 End: 15:30 
-/// Session 5 Start: 16:45 End: 17:10 TOTAL TIME: 5:25
+/// Session 5 Start: 16:45 End: 17:10
+/// Session 6 Start: 16:10 End: 16:35 TOTAL TIME: 5:50
 /// </summary>
 
 #pragma once
@@ -45,6 +46,7 @@ private:
 	void setupSprites(); // set up all images
 	void inputText(sf::Event t_event, std::string & t_string, unsigned t_maxChars); // takes input from keyboard and assigns to string
 	void update(sf::Time t_deltaTime); // main update method
+	int countPellets(); // counts the number of pellets remaining in the game
 	void render(); // renders framebuffer
 
 	// +++++++++++++++++++++++++++++
@@ -78,23 +80,25 @@ private:
 	1,2,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,1,
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 };
 
-	std::string m_playerNameString;
+	std::string m_playerNameString; // used to store the players name
+
+	int m_playerScore; // stores the players current score
+	const int m_pelletScore = 10;
 
 	// +++++++++++++++++++++++++++++
 
 	// ++++++++++ Objects ++++++++++
 	sf::RenderWindow m_window; // main SFML window
 
-	gameState currentState;
+	gameState m_currentState;
 
 	sf::Font m_ArialBlackfont;
-	sf::Text m_instructionsText;
-	sf::Text m_playerNameText;
+	sf::Text m_HUDText; // displays information to the user (name/score/instructions)
 
 	Player m_player;
 
-	sf::RectangleShape wall;
-	sf::CircleShape pellet;
+	sf::RectangleShape m_wall;
+	sf::CircleShape m_pellet;
 
 	Cell maze[NUM_ROWS][NUM_COLS];
 

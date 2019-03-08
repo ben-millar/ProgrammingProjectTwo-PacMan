@@ -22,7 +22,7 @@ Game::Game() :
 	m_window{ sf::VideoMode{ SCREEN_SIZE.x, SCREEN_SIZE.y, 32 }, "SFML Game" },
 	m_exitGame{ false } //when true game will exit
 {
-	currentState = gameState::menu;
+	m_currentState = gameState::menu;
 	setupFontAndText(); // load font 
 	setupObjects(); // set sfml object parameters
 	setupSprites(); // load and setup textures
@@ -81,7 +81,7 @@ void Game::processEvents()
 			}
 		}
 
-		switch (currentState)
+		switch (m_currentState)
 		{
 		case gameState::menu:
 
@@ -90,7 +90,7 @@ void Game::processEvents()
 			{
 				if (sf::Keyboard::Enter == event.key.code)
 				{
-					currentState = gameState::gameplay;
+					m_currentState = gameState::gameplay;
 				}
 			}
 
@@ -145,17 +145,9 @@ void Game::setupFontAndText()
 		std::cout << "problem loading arial black font" << std::endl;
 	}
 
-	m_instructionsText.setFont(m_ArialBlackfont);
-	m_instructionsText.setPosition({ 175.0f,200.0f });
-	m_instructionsText.setFillColor(sf::Color::White);
-	m_instructionsText.setCharacterSize(26U);
-	m_instructionsText.setString("Please enter your name below:");
-
-	m_playerNameText.setFont(m_ArialBlackfont);
-	m_playerNameText.setPosition({ 250.0f, 400.0f });
-	m_playerNameText.setFillColor(sf::Color::White);
-	m_playerNameText.setCharacterSize(36U);
-	m_playerNameText.setString("");
+	m_HUDText.setFont(m_ArialBlackfont);
+	m_HUDText.setFillColor(sf::Color::White);
+	m_HUDText.setString("");
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -177,7 +169,7 @@ void Game::setupSprites()
 ///</summary>
 void Game::setupObjects()
 {
-	// Set up maze array
+	// Set up maze array using game map
 	for (int i = 0; i < NUM_ROWS; i++)
 	{
 		for (int j = 0; j < NUM_COLS; j++)
@@ -197,14 +189,18 @@ void Game::setupObjects()
 		}
 	}
 
-	wall.setSize(CELL_SIZE);
-	wall.setFillColor(sf::Color::Blue);
+	// Initialise wall
+	m_wall.setSize(CELL_SIZE);
+	m_wall.setFillColor(sf::Color::Blue);
 
-	pellet.setRadius(4.0f);
-	pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
-	pellet.setFillColor(sf::Color::White);
+	// Initialise pellet
+	m_pellet.setRadius(4.0f);
+	m_pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
+	m_pellet.setFillColor(sf::Color::White);
 
+	// Initialise player
 	m_player.setPosition({ CELL_SIZE.x * 1.5f, CELL_SIZE.y * 1.5f });
+	m_playerScore = 0;
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -248,12 +244,17 @@ void Game::update(sf::Time t_deltaTime)
 		m_window.close();
 	}
 
-	switch(currentState)
+	switch(m_currentState)
 	{
 	case gameState::menu:
 		break;
 	case gameState::gameplay:
 		m_player.update();
+
+		if (countPellets() == 0)
+		{
+			m_currentState == gameState::gameover;
+		}
 		break;
 	case gameState::gameover:
 		break;
@@ -261,6 +262,33 @@ void Game::update(sf::Time t_deltaTime)
 		break;
 	}
 }
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
+/// Counts the number of pellets remaining in the maze
+/// </summary>
+/// <returns>Number of pellets remaining</returns>
+int Game::countPellets()
+{
+	int count = 0; 
+
+	for (int i = 0; i < NUM_ROWS; i++)
+	{
+		for (int j = 0; j < NUM_COLS; j++)
+		{
+			if (maze[i][j].getType() == cellType::pellet)
+			{
+				count++;
+			}
+		}
+	}
+
+	std::cout << count << std::endl;
+
+	return count;
+}
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /// <summary>
@@ -270,15 +298,25 @@ void Game::render()
 {
 	m_window.clear(sf::Color::Black);
 
-	switch(currentState)
+	switch(m_currentState)
 	{
 		case gameState::menu:
-			m_window.draw(m_instructionsText);
-			m_playerNameText.setString(m_playerNameString);
-			m_window.draw(m_playerNameText);
+			// display instructions
+			m_HUDText.setPosition({ 100.0f,200.0f });
+			m_HUDText.setCharacterSize(26U);
+			m_HUDText.setString("Please enter your name below:");
+			m_window.draw(m_HUDText);
+
+			// display player name
+			m_HUDText.setPosition({ 200.0f, 400.0f });
+			m_HUDText.setCharacterSize(36U);
+			m_HUDText.setString(m_playerNameString);
+			m_window.draw(m_HUDText);
 			break;
 
 		case gameState::gameplay:
+			/* Collision checks are done in render, as there is only 1 wall and 1 pellet object, which is moved around
+			   as required at render time.*/
 			for (int i = 0; i < NUM_ROWS; i++) // for all rows
 			{
 				for (int j = 0; j < NUM_COLS; j++) // for all columns
@@ -287,28 +325,35 @@ void Game::render()
 					if (maze[i][j].getType() == cellType::wall)
 					{
 						// set wall position
-						wall.setPosition({ j*CELL_SIZE.x, i*CELL_SIZE.y });
+						m_wall.setPosition({ j*CELL_SIZE.x, i*CELL_SIZE.y });
 						// check if player colliding
-						if (m_player.getBounds().intersects(wall.getGlobalBounds()))
+						if (m_player.getBounds().intersects(m_wall.getGlobalBounds()))
 						{
 							m_player.hitWall(); // tell player hit wall
 						}
-						m_window.draw(wall); // draw to screen
+						m_window.draw(m_wall); // draw to screen
 					}
 					// if cell type is pellet
 					else if (maze[i][j].getType() == cellType::pellet)
 					{
 						// set pellet position
-						pellet.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
+						m_pellet.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
 						// check if player colliding
-						if (m_player.getBounds().intersects(pellet.getGlobalBounds()))
+						if (m_player.getBounds().intersects(m_pellet.getGlobalBounds()))
 						{
+							m_playerScore += m_pelletScore;
 							maze[i][j].setType(cellType::null); // remove pellet
 						}
-						m_window.draw(pellet); // draw to screen
+						m_window.draw(m_pellet); // draw to screen
 					}
 				} // end inner for
 			} // end outer for
+
+			// draw player score
+			m_HUDText.setPosition({ 30.0f, 670.0f });
+			m_HUDText.setCharacterSize(36U);
+			m_HUDText.setString(m_playerNameString + "'s score: " + std::to_string(m_playerScore));
+			m_window.draw(m_HUDText);
 
 			m_player.draw(m_window); // draw player
 			break;
@@ -320,7 +365,6 @@ void Game::render()
 			break;
 	} // end switch
 
-	
 
 	m_window.display();
 }
