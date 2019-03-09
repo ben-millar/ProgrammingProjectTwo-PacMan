@@ -2,14 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include "Cell.h"
 #include "GLOBALS.h"
-enum class direction
-{
-	up,
-	down,
-	left,
-	right,
-	null
-};
 
 class Player
 {

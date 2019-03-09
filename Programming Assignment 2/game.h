@@ -19,6 +19,7 @@
 #include "MyVector3.h"
 #include "Cell.h"
 #include "Player.h"
+#include "Ghost.h"
 
 enum class gameState
 {
@@ -57,6 +58,14 @@ private:
 
 	static const int NUM_ROWS = 20;
 	static const int NUM_COLS = 20;
+	static const int NUM_GHOSTS = 4;
+	const sf::Vector2f GHOST_STARTING_POSITION[NUM_GHOSTS]
+	{ 
+		{ CELL_SIZE.x * 8.5f, CELL_SIZE.y * 9.5f }, 
+		{ CELL_SIZE.x * 9.5f,CELL_SIZE.y * 9.5f },
+		{ CELL_SIZE.x * 10.5f,CELL_SIZE.y * 9.5f },
+		{ CELL_SIZE.x * 11.5f,CELL_SIZE.y * 9.5f } 
+	};
 
 	int gameMap[NUM_ROWS][NUM_COLS] = 
   { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -67,7 +76,7 @@ private:
 	1,2,1,1,2,1,2,2,2,1,1,2,2,2,1,2,1,1,2,1,
 	1,2,2,2,2,1,1,1,2,1,1,2,1,1,1,2,2,2,2,1,
 	1,2,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,2,1,
-	1,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,1,
+	1,2,2,2,2,2,2,1,1,3,3,1,1,2,2,2,2,2,2,1,
 	1,1,1,2,1,1,2,1,0,0,0,0,1,2,1,1,2,1,1,1,
 	1,2,2,2,2,1,2,1,1,1,1,1,1,2,1,2,2,2,2,1,
 	1,2,1,1,2,1,2,2,2,2,2,2,2,2,1,2,1,1,2,1,
@@ -98,7 +107,10 @@ private:
 
 	Player m_player;
 
+	Ghost m_ghost[NUM_GHOSTS];
+
 	sf::RectangleShape m_wall;
+	sf::RectangleShape m_door;
 	sf::CircleShape m_pellet;
 
 	Cell maze[NUM_ROWS][NUM_COLS];

@@ -37,15 +37,19 @@ void Player::update()
 	switch (moveDirection)
 	{
 	case direction::up:
+		m_sprite.setRotation(270.0f);
 		body.move(0, -moveSpeed);
 		break;
 	case direction::down:
+		m_sprite.setRotation(90.0f);
 		body.move(0, moveSpeed);
 		break;
 	case direction::left:
+		m_sprite.setRotation(180.0f);
 		body.move(-moveSpeed, 0);
 		break;
 	case direction::right:
+		m_sprite.setRotation(0.0f);
 		body.move(moveSpeed, 0);
 		break;
 	default:
@@ -62,7 +66,8 @@ void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 			moveDirection = t_dir;
 		break;
 	case direction::down:
-		if (t_cellArray[currentCell.y+1][currentCell.x].getType() != cellType::wall) // if not a wall
+		if (t_cellArray[currentCell.y+1][currentCell.x].getType() != cellType::wall &&
+			t_cellArray[currentCell.y + 1][currentCell.x].getType() != cellType::door) // if not a wall OR a door
 			moveDirection = t_dir;
 		break;
 	case direction::left:

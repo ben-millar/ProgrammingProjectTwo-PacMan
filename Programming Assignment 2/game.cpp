@@ -6,7 +6,8 @@
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
 /// Session 4 Start: 14:30 End: 15:30 
-/// Session 5 Start: 16:45 End: 17:10 TOTAL TIME: 5:25
+/// Session 5 Start: 16:45 End: 17:10
+/// Session 6 Start: 18:00 End: 18:45 TOTAL TIME: 6:10
 /// </summary>
 
 #include "game.h"
@@ -82,9 +83,9 @@ void Game::processEvents()
 
 		// ++++++++ Checks gamestate and takes keyboard events as required ++++++++
 		switch (m_currentState)
-
 		{
-		case gameState::menu: // ++++++++ MENU ++++++++
+		// ++++++++ MENU ++++++++
+		case gameState::menu: 
 
 			// proceed to gameplay when they press enter
 			if (sf::Event::KeyPressed == event.type)
@@ -102,8 +103,8 @@ void Game::processEvents()
 			}
 			
 			break;
-
-		case gameState::gameplay: // ++++++++ GAMEPLAY ++++++++
+		// ++++++++ GAMEPLAY ++++++++
+		case gameState::gameplay: 
 
 			if (sf::Event::KeyPressed == event.type)
 			{
@@ -125,8 +126,8 @@ void Game::processEvents()
 					break; // break out of KeyPress event
 				}
 			break; // break out of gameplay
-
-		case gameState::gameover: // ++++++++ GAME OVER ++++++++
+		// ++++++++ GAME OVER ++++++++
+		case gameState::gameover: 
 			break;
 
 		default:
@@ -183,6 +184,10 @@ void Game::setupObjects()
 			{
 				maze[i][j].setType(cellType::pellet);
 			}
+			else if (gameMap[i][j] == 3)
+			{
+				maze[i][j].setType(cellType::door);
+			}
 			else
 			{
 				maze[i][j].setType(cellType::null);
@@ -194,6 +199,10 @@ void Game::setupObjects()
 	m_wall.setSize(CELL_SIZE);
 	m_wall.setFillColor(sf::Color::Blue);
 
+	// Initialise door
+	m_door.setSize({ CELL_SIZE.x, CELL_SIZE.y / 2.0f });
+	m_door.setFillColor(sf::Color(192, 192, 192, 255));
+
 	// Initialise pellet
 	m_pellet.setRadius(4.0f);
 	m_pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
@@ -202,6 +211,16 @@ void Game::setupObjects()
 	// Initialise player
 	m_player.setPosition({ CELL_SIZE.x * 1.5f, CELL_SIZE.y * 1.5f });
 	m_playerScore = 0;
+
+	for (int i = 0; i < NUM_GHOSTS; i++)
+	{
+		m_ghost[i].setPosition(GHOST_STARTING_POSITION[i]);
+	}
+
+	m_ghost[0].setColor(sf::Color::Red);
+	m_ghost[1].setColor(sf::Color(255,128,0,255));
+	m_ghost[2].setColor(sf::Color::Cyan);
+	m_ghost[3].setColor(sf::Color(255, 192, 192, 255));
 }
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -247,16 +266,20 @@ void Game::update(sf::Time t_deltaTime)
 
 	switch(m_currentState)
 	{
+	// +++++++ MENU +++++++
 	case gameState::menu:
 		break;
+	// +++++ GAMEPLAY +++++
 	case gameState::gameplay:
 		m_player.update();
 
-		if (countPellets() == 0)
+		for (int i = 0; i < NUM_GHOSTS; i++)
 		{
-			m_currentState = gameState::gameover;
+			m_ghost[i].update();
 		}
+
 		break;
+	// ++++ GAME OVER ++++
 	case gameState::gameover:
 		break;
 	default:
@@ -301,6 +324,7 @@ void Game::render()
 
 	switch(m_currentState)
 	{
+		// ++++++ MENU ++++++
 		case gameState::menu:
 			// display instructions
 			m_HUDText.setPosition({ 100.0f,200.0f });
@@ -315,6 +339,7 @@ void Game::render()
 			m_window.draw(m_HUDText);
 			break;
 
+		// ++++ GAMEPLAY ++++
 		case gameState::gameplay:
 			/* Collision checks are done in render, as there is only 1 wall and 1 pellet object, which is moved around
 			   as required at render time.*/
@@ -325,27 +350,47 @@ void Game::render()
 					// if cell type is wall
 					if (maze[i][j].getType() == cellType::wall)
 					{
-						// set wall position
 						m_wall.setPosition({ j*CELL_SIZE.x, i*CELL_SIZE.y });
-						// check if player colliding
+
 						if (m_player.getBounds().intersects(m_wall.getGlobalBounds()))
 						{
 							m_player.hitWall(); // tell player hit wall
+						}
+
+						for (int i = 0; i < NUM_GHOSTS; i++)
+						{
+							if (m_ghost[i].getBounds().intersects(m_wall.getGlobalBounds()))
+							{
+								m_ghost[i].hitWall();
+							}
 						}
 						m_window.draw(m_wall); // draw to screen
 					}
 					// if cell type is pellet
 					else if (maze[i][j].getType() == cellType::pellet)
 					{
-						// set pellet position
+
 						m_pellet.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
-						// check if player colliding
+
 						if (m_player.getBounds().intersects(m_pellet.getGlobalBounds()))
 						{
-							m_playerScore += m_pelletScore;
+							m_playerScore += m_pelletScore; // incremenet score
 							maze[i][j].setType(cellType::null); // remove pellet
+							if (countPellets() == 0)
+							{
+								m_currentState = gameState::gameover;
+							}
 						}
 						m_window.draw(m_pellet); // draw to screen
+					}
+					else if (maze[i][j].getType() == cellType::door)
+					{
+						if (m_player.getBounds().intersects(m_door.getGlobalBounds()))
+						{
+							m_player.hitWall(); // tell player hit wall
+						}
+						m_door.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
+						m_window.draw(m_door);
 					}
 				} // end inner for
 			} // end outer for
@@ -356,9 +401,15 @@ void Game::render()
 			m_HUDText.setString(m_playerNameString + "'s score: " + std::to_string(m_playerScore));
 			m_window.draw(m_HUDText);
 
+			for (int i = 0; i < NUM_GHOSTS; i++)
+			{
+				m_ghost[i].draw(m_window); // draw ghost
+			}
+
 			m_player.draw(m_window); // draw player
 			break;
 
+		// ++++ GAMEOVER ++++
 		case gameState::gameover:
 			break;
 

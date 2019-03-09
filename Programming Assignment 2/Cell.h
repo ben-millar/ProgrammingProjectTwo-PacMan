@@ -4,6 +4,7 @@ enum class cellType
 {
 	wall,
 	pellet,
+	door, // for ghosts
 	null
 };
 
