@@ -8,7 +8,13 @@
 /// Session 4 Start: 14:30 End: 15:30 
 /// Session 5 Start: 16:45 End: 17:10
 /// Session 6 Start: 16:10 End: 16:35 TOTAL TIME: 5:50
+/// Session 7 Start: 09:30 End: 
 /// </summary>
+
+// TO DO: Cells should have their own texture which they draw as appropriate; draw call should be sent to cells in render function.
+// No drawing (of maze) should be done in the game.cpp -- DONE --
+
+// Collision detection should be refactored to be based entirely off of cell information rather than getGlobalBounds. -- Not done, but improved --
 
 #pragma once
 #ifndef GAME
@@ -47,6 +53,7 @@ private:
 	void setupSprites(); // set up all images
 	void inputText(sf::Event t_event, std::string & t_string, unsigned t_maxChars); // takes input from keyboard and assigns to string
 	void update(sf::Time t_deltaTime); // main update method
+	void checkCollisions(); // check collisions between game entities
 	int countPellets(); // counts the number of pellets remaining in the game
 	void render(); // renders framebuffer
 
@@ -67,6 +74,7 @@ private:
 		{ CELL_SIZE.x * 11.5f,CELL_SIZE.y * 9.5f } 
 	};
 
+	// Stores information on the game cells
 	int gameMap[NUM_ROWS][NUM_COLS] = 
   { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 	1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1,
@@ -100,7 +108,7 @@ private:
 
 	sf::RenderWindow m_window; // main SFML window
 
-	gameState m_currentState;
+	gameState m_currentState; // current game state (menu/gameplay/gameover)
 
 	sf::Font m_ArialBlackfont;
 	sf::Text m_HUDText; // displays information to the user (name/score/instructions)
@@ -113,6 +121,7 @@ private:
 	sf::RectangleShape m_door;
 	sf::CircleShape m_pellet;
 
+	// Array of cells
 	Cell maze[NUM_ROWS][NUM_COLS];
 
 	// +++++++++++++++++++++++++++++

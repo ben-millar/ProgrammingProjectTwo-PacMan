@@ -22,7 +22,12 @@ Game::Game() :
 	m_window{ sf::VideoMode{ SCREEN_SIZE.x, SCREEN_SIZE.y, 32 }, "SFML Game" },
 	m_exitGame{ false } //when true game will exit
 {
+#ifdef _DEBUG
+	m_currentState = gameState::gameplay;
+	m_playerNameString = "Debug";
+#else
 	m_currentState = gameState::menu;
+#endif
 	setupFontAndText(); // load font 
 	setupObjects(); // set sfml object parameters
 	setupSprites(); // load and setup textures
@@ -192,6 +197,8 @@ void Game::setupObjects()
 			{
 				maze[i][j].setType(cellType::null);
 			}
+
+			maze[i][j].setPosition({ j, i });
 		}
 	}
 
@@ -212,6 +219,7 @@ void Game::setupObjects()
 	m_player.setPosition({ CELL_SIZE.x * 1.5f, CELL_SIZE.y * 1.5f });
 	m_playerScore = 0;
 
+	// Initialise ghosts
 	for (int i = 0; i < NUM_GHOSTS; i++)
 	{
 		m_ghost[i].setPosition(GHOST_STARTING_POSITION[i]);
@@ -278,6 +286,8 @@ void Game::update(sf::Time t_deltaTime)
 			m_ghost[i].update();
 		}
 
+		checkCollisions();
+
 		break;
 	// ++++ GAME OVER ++++
 	case gameState::gameover:
@@ -285,6 +295,48 @@ void Game::update(sf::Time t_deltaTime)
 	default:
 		break;
 	}
+}
+
+/// <summary>
+/// Checks for collisions between game entities and the maze
+/// </summary>
+void Game::checkCollisions()
+{
+	for (int i = 0; i < NUM_ROWS; i++) // for all rows
+	{
+		for (int j = 0; j < NUM_COLS; j++) // for all columns
+		{
+			// check player collisions
+			if (m_player.getBounds().intersects(maze[i][j].getBounds()))
+			{
+				if (maze[i][j].getType() == cellType::wall || maze[i][j].getType() == cellType::door)
+				{
+					m_player.hitWall();
+				}
+				else if (maze[i][j].getType() == cellType::pellet)
+				{
+					m_playerScore += m_pelletScore; // increment score
+					maze[i][j].setType(cellType::null); // remove pellet
+					if (countPellets() == 0)
+					{
+						m_currentState = gameState::gameover;
+					}
+				}
+			}
+
+			// check ghost collisions
+			for (int k = 0; k < NUM_GHOSTS; k++)
+			{
+				if (m_ghost[k].getBounds().intersects(maze[i][j].getBounds()))
+				{
+					if (maze[i][j].getType() == cellType::wall)
+					{
+						m_ghost[k].hitWall(maze);
+					}
+				}
+			}
+		} // end inner for
+	} // end outer for
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -341,59 +393,13 @@ void Game::render()
 
 		// ++++ GAMEPLAY ++++
 		case gameState::gameplay:
-			/* Collision checks are done in render, as there is only 1 wall and 1 pellet object, which is moved around
-			   as required at render time.*/
 			for (int i = 0; i < NUM_ROWS; i++) // for all rows
 			{
 				for (int j = 0; j < NUM_COLS; j++) // for all columns
 				{
-					// if cell type is wall
-					if (maze[i][j].getType() == cellType::wall)
-					{
-						m_wall.setPosition({ j*CELL_SIZE.x, i*CELL_SIZE.y });
-
-						if (m_player.getBounds().intersects(m_wall.getGlobalBounds()))
-						{
-							m_player.hitWall(); // tell player hit wall
-						}
-
-						for (int i = 0; i < NUM_GHOSTS; i++)
-						{
-							if (m_ghost[i].getBounds().intersects(m_wall.getGlobalBounds()))
-							{
-								m_ghost[i].hitWall();
-							}
-						}
-						m_window.draw(m_wall); // draw to screen
-					}
-					// if cell type is pellet
-					else if (maze[i][j].getType() == cellType::pellet)
-					{
-
-						m_pellet.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
-
-						if (m_player.getBounds().intersects(m_pellet.getGlobalBounds()))
-						{
-							m_playerScore += m_pelletScore; // incremenet score
-							maze[i][j].setType(cellType::null); // remove pellet
-							if (countPellets() == 0)
-							{
-								m_currentState = gameState::gameover;
-							}
-						}
-						m_window.draw(m_pellet); // draw to screen
-					}
-					else if (maze[i][j].getType() == cellType::door)
-					{
-						if (m_player.getBounds().intersects(m_door.getGlobalBounds()))
-						{
-							m_player.hitWall(); // tell player hit wall
-						}
-						m_door.setPosition({ j*CELL_SIZE.x,i*CELL_SIZE.y });
-						m_window.draw(m_door);
-					}
-				} // end inner for
-			} // end outer for
+					maze[i][j].draw(m_window);
+				}
+			}
 
 			// draw player score
 			m_HUDText.setPosition({ 30.0f, 670.0f });

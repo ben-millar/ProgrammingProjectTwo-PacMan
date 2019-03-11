@@ -1,7 +1,9 @@
 #include "Player.h"
 #include <iostream>
 
-
+/// <summary>
+/// Sets up the player sprite and texture
+/// </summary>
 void Player::setupSprite()
 {
 	if (!m_texture.loadFromFile("ASSETS\\IMAGES\\pacmanSprite.png"))
@@ -13,6 +15,9 @@ void Player::setupSprite()
 	m_sprite.setOrigin({ 16.0f,16.0f });
 }
 
+/// <summary>
+/// Default Constructor
+/// </summary>
 Player::Player()
 {
 	setupSprite();
@@ -25,13 +30,19 @@ Player::Player()
 	moveDirection = direction::null;
 }
 
-
+/// <summary>
+/// Default destructor
+/// </summary>
 Player::~Player()
 {
 }
 
+/// <summary>
+/// Main update method for the player
+/// </summary>
 void Player::update()
 {
+	// ( position / cell size ) returns the position in terms of cells
 	currentCell = { int(body.getPosition().x / CELL_SIZE.x), int(body.getPosition().y / CELL_SIZE.y) };
 
 	switch (moveDirection)
@@ -57,6 +68,11 @@ void Player::update()
 	}
 }
 
+/// <summary>
+/// Called on user key press, checks boundaries and changes player direction if appropriate
+/// </summary>
+/// <param name="t_dir">Direction the player wants to move</param>
+/// <param name="t_cellArray">Cell type array</param>
 void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 {
 	switch (t_dir)
@@ -83,6 +99,9 @@ void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 	}
 }
 
+/// <summary>
+/// Called when the player hits a wall to reset their position
+/// </summary>
 void Player::hitWall()
 {
 	// set player position to center of their current cell
