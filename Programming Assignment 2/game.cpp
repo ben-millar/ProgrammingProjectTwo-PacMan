@@ -97,6 +97,7 @@ void Game::processEvents()
 			{
 				if (sf::Keyboard::Enter == event.key.code)
 				{
+					m_ghostClock.restart();
 					m_currentState = gameState::gameplay;
 				}
 			}
@@ -224,8 +225,6 @@ void Game::setupObjects()
 	{
 		m_ghost[i].setPosition(GHOST_STARTING_POSITION[i]);
 	}
-
-	m_ghostClock.restart();
 
 	m_ghost[0].setColor(sf::Color::Red);
 	m_ghost[1].setColor(sf::Color(255,128,0,255));
