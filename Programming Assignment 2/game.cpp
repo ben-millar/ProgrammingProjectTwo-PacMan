@@ -225,6 +225,8 @@ void Game::setupObjects()
 		m_ghost[i].setPosition(GHOST_STARTING_POSITION[i]);
 	}
 
+	m_ghostClock.restart();
+
 	m_ghost[0].setColor(sf::Color::Red);
 	m_ghost[1].setColor(sf::Color(255,128,0,255));
 	m_ghost[2].setColor(sf::Color::Cyan);
@@ -281,9 +283,18 @@ void Game::update(sf::Time t_deltaTime)
 	case gameState::gameplay:
 		m_player.update();
 
+		// for all ghosts
 		for (int i = 0; i < NUM_GHOSTS; i++)
 		{
-			m_ghost[i].update();
+			m_ghost[i].update(m_player.getCell(), maze); // update ghost
+
+			if (m_ghost[i].isActive() == false) // if inactive
+			{
+				if (m_ghostClock.getElapsedTime() > m_ghostTimer[i])
+				{
+					m_ghost[i].start(); // start ghost if timer is up
+				}
+			}
 		}
 
 		checkCollisions();

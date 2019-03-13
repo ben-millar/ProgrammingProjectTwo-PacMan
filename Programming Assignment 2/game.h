@@ -117,6 +117,15 @@ private:
 
 	Ghost m_ghost[NUM_GHOSTS];
 
+	sf::Clock m_ghostClock;
+	sf::Time m_ghostTimer[NUM_GHOSTS] =
+	{
+		sf::seconds(2.0f),
+		sf::seconds(5.0f),
+		sf::seconds(10.0f),
+		sf::seconds(15.0f)
+	};
+
 	sf::RectangleShape m_wall;
 	sf::RectangleShape m_door;
 	sf::CircleShape m_pellet;
