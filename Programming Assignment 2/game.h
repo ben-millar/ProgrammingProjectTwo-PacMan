@@ -1,14 +1,20 @@
 /// <summary>
 /// Author: Ben Millar – C00236772
 /// Date: 01/03/2019
+/// 
+/// Description:
+/// 
+/// 
+/// 
+/// 
 /// Estimated time to complete: 12 hours
 /// Session 1 Start: 18:45 End: 19:45
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
 /// Session 4 Start: 14:30 End: 15:30 
 /// Session 5 Start: 16:45 End: 17:10
-/// Session 6 Start: 16:10 End: 16:35 TOTAL TIME: 5:50
-/// Session 7 Start: 09:30 End: 
+/// Session 6 Start: 18:00 End: 18:45
+/// Session 7 Start: 15:15 End: 16:30 TOTAL TIME: 7:25
 /// </summary>
 
 // TO DO: Cells should have their own texture which they draw as appropriate; draw call should be sent to cells in render function.
@@ -50,12 +56,18 @@ private:
 	void setupFontAndText(); // set up all text
 	void setupSounds(); // set up all sounds
 	void setupObjects(); // set up all sfml objects
+	void setupMaze(); // set up our maze array from our int array
 	void setupSprites(); // set up all images
 	void inputText(sf::Event t_event, std::string & t_string, unsigned t_maxChars); // takes input from keyboard and assigns to string
 	void update(sf::Time t_deltaTime); // main update method
 	void checkCollisions(); // check collisions between game entities
 	int countPellets(); // counts the number of pellets remaining in the game
 	void render(); // renders framebuffer
+
+	void saveScore(); // saves player score to a file
+
+	void softReset(); // resets player and ghost positions after a player loses a life
+	void hardReset(); // resets game to its initial state after a game over
 
 	// +++++++++++++++++++++++++++++
 
@@ -66,13 +78,15 @@ private:
 	static const int NUM_ROWS = 20;
 	static const int NUM_COLS = 20;
 	static const int NUM_GHOSTS = 4;
-	const sf::Vector2f GHOST_STARTING_POSITION[NUM_GHOSTS]
+	const sf::Vector2f M_GHOST_STARTING_POSITION[NUM_GHOSTS]
 	{ 
 		{ CELL_SIZE.x * 8.5f, CELL_SIZE.y * 9.5f }, 
 		{ CELL_SIZE.x * 9.5f,CELL_SIZE.y * 9.5f },
 		{ CELL_SIZE.x * 10.5f,CELL_SIZE.y * 9.5f },
 		{ CELL_SIZE.x * 11.5f,CELL_SIZE.y * 9.5f } 
 	};
+
+	const sf::Vector2f M_PLAYER_STARTING_POSITION{ CELL_SIZE.x * 10.5f, CELL_SIZE.y * 11.5f };
 
 	// Stores information on the game cells
 	int gameMap[NUM_ROWS][NUM_COLS] = 
@@ -87,7 +101,7 @@ private:
 	1,2,2,2,2,2,2,1,1,3,3,1,1,2,2,2,2,2,2,1,
 	1,1,1,2,1,1,2,1,0,0,0,0,1,2,1,1,2,1,1,1,
 	1,2,2,2,2,1,2,1,1,1,1,1,1,2,1,2,2,2,2,1,
-	1,2,1,1,2,1,2,2,2,2,2,2,2,2,1,2,1,1,2,1,
+	1,2,1,1,2,1,2,2,2,0,0,2,2,2,1,2,1,1,2,1,
 	1,2,2,1,2,1,2,1,1,1,1,1,1,2,1,2,1,2,2,1,
 	1,1,2,1,2,2,2,2,2,1,1,2,2,2,2,2,1,2,1,1,
 	1,1,2,1,2,1,1,1,2,1,1,2,1,1,1,2,1,2,1,1,
@@ -113,9 +127,9 @@ private:
 	sf::Font m_ArialBlackfont;
 	sf::Text m_HUDText; // displays information to the user (name/score/instructions)
 
-	Player m_player;
-
-	Ghost m_ghost[NUM_GHOSTS];
+	// entities
+	Player m_player; // instance of object of type player
+	Ghost m_ghost[NUM_GHOSTS]; // array of objects of type ghost
 
 	sf::Clock m_ghostClock;
 	sf::Time m_ghostTimer[NUM_GHOSTS] =

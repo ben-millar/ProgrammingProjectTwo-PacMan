@@ -22,12 +22,14 @@ Player::Player()
 {
 	setupSprite();
 
-	body.setRadius(CELL_SIZE.x/2.0f);
-	body.setFillColor(sf::Color::Yellow);
-	body.setOrigin(CELL_SIZE.x / 2.0f, CELL_SIZE.x / 2.0f);
+	m_body.setRadius(CELL_SIZE.x/2.0f);
+	m_body.setFillColor(sf::Color::Yellow);
+	m_body.setOrigin(CELL_SIZE.x / 2.0f, CELL_SIZE.x / 2.0f);
 
-	moveSpeed = 1.5f;
-	moveDirection = direction::null;
+	m_lives = 3;
+
+	m_moveSpeed = 1.5f;
+	m_moveDirection = direction::null;
 }
 
 /// <summary>
@@ -43,25 +45,25 @@ Player::~Player()
 void Player::update()
 {
 	// ( position / cell size ) returns the position in terms of cells
-	currentCell = { int(body.getPosition().x / CELL_SIZE.x), int(body.getPosition().y / CELL_SIZE.y) };
+	m_currentCell = { int(m_body.getPosition().x / CELL_SIZE.x), int(m_body.getPosition().y / CELL_SIZE.y) };
 
-	switch (moveDirection)
+	switch (m_moveDirection)
 	{
 	case direction::up:
 		m_sprite.setRotation(270.0f);
-		body.move(0, -moveSpeed);
+		m_body.move(0, -m_moveSpeed);
 		break;
 	case direction::down:
 		m_sprite.setRotation(90.0f);
-		body.move(0, moveSpeed);
+		m_body.move(0, m_moveSpeed);
 		break;
 	case direction::left:
 		m_sprite.setRotation(180.0f);
-		body.move(-moveSpeed, 0);
+		m_body.move(-m_moveSpeed, 0);
 		break;
 	case direction::right:
 		m_sprite.setRotation(0.0f);
-		body.move(moveSpeed, 0);
+		m_body.move(m_moveSpeed, 0);
 		break;
 	default:
 		break;
@@ -78,21 +80,24 @@ void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 	switch (t_dir)
 	{
 	case direction::up:
-		if (t_cellArray[currentCell.y-1][currentCell.x].getType() != cellType::wall) // if not a wall
-			moveDirection = t_dir;
+		if (t_cellArray[m_currentCell.y-1][m_currentCell.x].getType() != cellType::wall) // if not a wall
+			m_moveDirection = t_dir;
 		break;
 	case direction::down:
-		if (t_cellArray[currentCell.y+1][currentCell.x].getType() != cellType::wall &&
-			t_cellArray[currentCell.y + 1][currentCell.x].getType() != cellType::door) // if not a wall OR a door
-			moveDirection = t_dir;
+		if (t_cellArray[m_currentCell.y+1][m_currentCell.x].getType() != cellType::wall &&
+			t_cellArray[m_currentCell.y + 1][m_currentCell.x].getType() != cellType::door) // if not a wall OR a door
+			m_moveDirection = t_dir;
 		break;
 	case direction::left:
-		if (t_cellArray[currentCell.y][currentCell.x-1].getType() != cellType::wall) // if not a wall
-			moveDirection = t_dir;
+		if (t_cellArray[m_currentCell.y][m_currentCell.x-1].getType() != cellType::wall) // if not a wall
+			m_moveDirection = t_dir;
 		break;
 	case direction::right:
-		if (t_cellArray[currentCell.y][currentCell.x+1].getType() != cellType::wall) // if not a wall 
-			moveDirection = t_dir;
+		if (t_cellArray[m_currentCell.y][m_currentCell.x+1].getType() != cellType::wall) // if not a wall 
+			m_moveDirection = t_dir;
+		break;
+	case direction::null:
+		m_moveDirection = t_dir;
 		break;
 	default:
 		break;
@@ -105,5 +110,5 @@ void Player::changeDirection(direction t_dir, Cell t_cellArray[][20])
 void Player::hitWall()
 {
 	// set player position to center of their current cell
-	body.setPosition({ (currentCell.x * CELL_SIZE.x) + body.getRadius() , (currentCell.y * CELL_SIZE.y) + body.getRadius() });
+	m_body.setPosition({ (m_currentCell.x * CELL_SIZE.x) + m_body.getRadius() , (m_currentCell.y * CELL_SIZE.y) + m_body.getRadius() });
 }

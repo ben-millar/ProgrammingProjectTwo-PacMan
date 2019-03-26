@@ -1,18 +1,26 @@
 /// <summary>
 /// Author: Ben Millar – C00236772
 /// Date: 01/03/2019
+/// 
+/// Description:
+/// 
+/// 
+/// 
+/// 
 /// Estimated time to complete: 12 hours
 /// Session 1 Start: 18:45 End: 19:45
 /// Session 2 Start: 18:00 End: 19:30
 /// Session 3 Start: 09:30 End: 11:00
 /// Session 4 Start: 14:30 End: 15:30 
 /// Session 5 Start: 16:45 End: 17:10
-/// Session 6 Start: 18:00 End: 18:45 TOTAL TIME: 6:10
+/// Session 6 Start: 18:00 End: 18:45
+/// Session 7 Start: 15:15 End: 16:30 TOTAL TIME: 7:25
 /// </summary>
 
 #include "game.h"
 #include "GLOBALS.h"
 #include <iostream>
+#include <fstream>
 
 /// <summary>
 /// default construcor
@@ -30,6 +38,7 @@ Game::Game() :
 #endif
 	setupFontAndText(); // load font 
 	setupObjects(); // set sfml object parameters
+	setupMaze(); // set up maze array from our game map array
 	setupSprites(); // load and setup textures
 	setupSounds(); // load and setup sound buffers
 }
@@ -134,7 +143,17 @@ void Game::processEvents()
 			break; // break out of gameplay
 		// ++++++++ GAME OVER ++++++++
 		case gameState::gameover: 
-			break;
+
+			if (sf::Event::KeyPressed == event.type)
+			{
+				if (event.key.code == sf::Keyboard::R)
+				{
+					hardReset(); // restart game
+					m_currentState = gameState::gameplay;
+				}
+			}
+
+			break; // break out of gameOver
 
 		default:
 			break;
@@ -177,7 +196,42 @@ void Game::setupSprites()
 ///</summary>
 void Game::setupObjects()
 {
-	// Set up maze array using game map
+	// Initialise wall
+	m_wall.setSize(CELL_SIZE);
+	m_wall.setFillColor(sf::Color::Blue);
+
+	// Initialise door
+	m_door.setSize({ CELL_SIZE.x, CELL_SIZE.y / 2.0f });
+	m_door.setFillColor(sf::Color(192, 192, 192, 255));
+
+	// Initialise pellet
+	m_pellet.setRadius(4.0f);
+	m_pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
+	m_pellet.setFillColor(sf::Color::White);
+
+	// Initialise player
+	m_player.setPosition(M_PLAYER_STARTING_POSITION);
+	m_playerScore = 0;
+
+	// Initialise ghosts
+	for (int i = 0; i < NUM_GHOSTS; i++)
+	{
+		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
+	}
+
+	m_ghost[0].setColor(sf::Color::Red);
+	m_ghost[1].setColor(sf::Color(255,128,0,255));
+	m_ghost[2].setColor(sf::Color::Cyan);
+	m_ghost[3].setColor(sf::Color(255, 192, 192, 255));
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
+/// Set up maze array using game map
+/// </summary>
+void Game::setupMaze()
+{
 	for (int i = 0; i < NUM_ROWS; i++)
 	{
 		for (int j = 0; j < NUM_COLS; j++)
@@ -202,35 +256,8 @@ void Game::setupObjects()
 			maze[i][j].setPosition({ j, i });
 		}
 	}
-
-	// Initialise wall
-	m_wall.setSize(CELL_SIZE);
-	m_wall.setFillColor(sf::Color::Blue);
-
-	// Initialise door
-	m_door.setSize({ CELL_SIZE.x, CELL_SIZE.y / 2.0f });
-	m_door.setFillColor(sf::Color(192, 192, 192, 255));
-
-	// Initialise pellet
-	m_pellet.setRadius(4.0f);
-	m_pellet.setOrigin({ -(CELL_SIZE.x / 2.0f - 4.0f),-(CELL_SIZE.y / 2.0f - 4.0f) });
-	m_pellet.setFillColor(sf::Color::White);
-
-	// Initialise player
-	m_player.setPosition({ CELL_SIZE.x * 1.5f, CELL_SIZE.y * 1.5f });
-	m_playerScore = 0;
-
-	// Initialise ghosts
-	for (int i = 0; i < NUM_GHOSTS; i++)
-	{
-		m_ghost[i].setPosition(GHOST_STARTING_POSITION[i]);
-	}
-
-	m_ghost[0].setColor(sf::Color::Red);
-	m_ghost[1].setColor(sf::Color(255,128,0,255));
-	m_ghost[2].setColor(sf::Color::Cyan);
-	m_ghost[3].setColor(sf::Color(255, 192, 192, 255));
 }
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /// <summary>
@@ -280,7 +307,8 @@ void Game::update(sf::Time t_deltaTime)
 		break;
 	// +++++ GAMEPLAY +++++
 	case gameState::gameplay:
-		m_player.update();
+
+		m_player.update(); // update player
 
 		// for all ghosts
 		for (int i = 0; i < NUM_GHOSTS; i++)
@@ -297,6 +325,14 @@ void Game::update(sf::Time t_deltaTime)
 		}
 
 		checkCollisions();
+
+		// +++ PLAYER HAS NO LIVES REMAINING +++
+
+		if (m_player.getLives() <= 0 || sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+		{
+			saveScore(); // save players final score
+			m_currentState = gameState::gameover; // set gamestate to game over
+		}
 
 		break;
 	// ++++ GAME OVER ++++
@@ -316,7 +352,7 @@ void Game::checkCollisions()
 	{
 		for (int j = 0; j < NUM_COLS; j++) // for all columns
 		{
-			// check player collisions
+			// check player collisions with maze
 			if (m_player.getBounds().intersects(maze[i][j].getBounds()))
 			{
 				if (maze[i][j].getType() == cellType::wall || maze[i][j].getType() == cellType::door)
@@ -334,7 +370,7 @@ void Game::checkCollisions()
 				}
 			}
 
-			// check ghost collisions
+			// check ghost collisions with maze
 			for (int k = 0; k < NUM_GHOSTS; k++)
 			{
 				if (m_ghost[k].getBounds().intersects(maze[i][j].getBounds()))
@@ -347,6 +383,17 @@ void Game::checkCollisions()
 			}
 		} // end inner for
 	} // end outer for
+
+
+	// check player collisions with ghosts
+	for (int i = 0; i < NUM_GHOSTS; i++)
+	{
+		if (m_player.getBounds().intersects(m_ghost[i].getBounds()))
+		{
+			m_player.kill(); // kill player
+			softReset(); // perform a soft reset
+		}
+	}
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -427,13 +474,83 @@ void Game::render()
 
 		// ++++ GAMEOVER ++++
 		case gameState::gameover:
+
+			m_HUDText.setPosition(100.0f, 200.0f);
+			m_HUDText.setString("\t\tGAME OVER\n\n" + m_playerNameString + "'s final Score: " + std::to_string(m_playerScore) + "\n\n\n\t\t [R]estart?");
+			m_window.draw(m_HUDText);
 			break;
 
 		default:
 			break;
 	} // end switch
 
-
-	m_window.display();
+	m_window.display(); // switch framebuffers
 }
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
+/// Tries to save the players score to a HIGHSCORES file
+/// </summary>
+void Game::saveScore()
+{
+	std::ofstream outputFile; // create an output file stream
+
+	try // try to open our file
+	{
+		outputFile.open("HIGHSCORES.txt");
+
+		if (outputFile.is_open()) // if our file opened successfully
+		{
+			std::cout.flush(); // flush data from the output stream before we write
+
+			std::string scoreOutput = m_playerNameString + ": " + std::to_string(m_playerScore) + "\n"; // assemble our string
+			
+			outputFile << scoreOutput; // write our string to file
+
+			outputFile.close(); // close our file again
+		}
+		else // if it did not open successfully, throw an exception
+		{
+			throw std::exception("Exception when trying to open output file 'HIGHSCORES.txt'");
+		}
+	}
+	// catch any exceptions of class std::exception
+	catch(std::exception e) 
+	{
+		std::cout << e.what() << std::endl;
+	}
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
+/// This method resets the positions of in-game entities following the loss of a players life
+/// Score/Pellets eaten are maintained
+/// </summary>
+void Game::softReset()
+{
+	// reset positions of all ghosts
+	for (int i = 0; i < NUM_GHOSTS; i++)
+	{
+		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
+	}
+
+	// reset position of player
+	m_player.setPosition(M_PLAYER_STARTING_POSITION);
+}
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/// <summary>
+/// This method resets the game to its original state. 
+/// All parameters (score/pellets/positions) are reset.
+/// </summary>
+void Game::hardReset()
+{
+	setupObjects(); // reset score and entity positions
+	setupMaze(); // reset maze array
+	m_player.changeDirection(direction::null, maze); // reset player direction
+}
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
