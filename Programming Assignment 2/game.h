@@ -40,6 +40,12 @@ enum class gameState
 	gameover
 };
 
+struct scoreEntry
+{
+	std::string name;
+	int score;
+};
+
 class Game
 {
 public:

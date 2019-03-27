@@ -509,6 +509,58 @@ void Game::render()
 /// </summary>
 void Game::saveScore()
 {
+	scoreEntry newEntry;
+
+	newEntry.name = m_playerNameString;
+	newEntry.score = m_playerScore;
+
+	// +++++ READ IN HIGHSCORE TABLE +++++
+
+	std::ifstream inputFile;
+
+	try
+	{
+		inputFile.open("HIGHSCORES.TXT");
+
+		if (inputFile.is_open()) // if our file is open
+		{
+			// create temp variables to hold the data 
+			// we're reading in from the file
+			std::string inputLine = ""; 
+			int newScore = 0;
+
+			// while we're not at the end of file
+			while (!inputFile.eof())
+			{
+				// take a line from the file into our string
+				std::getline(inputFile, inputLine);
+
+				int len = inputLine.length();
+
+				for (int i = 0; i < len; i++) // for our whole string
+				{
+
+				}
+			}
+
+			inputFile.close(); // close our input file
+
+			// +++++ SORT SCORES BY VALUE +++++
+
+		}
+		else
+		{
+			throw std::exception("Exception when trying to open file 'HIGHSCORES.txt' for data input");
+		}
+	}
+
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	// +++++ OUTPUT OUR NEW SCORE TABLE +++++
+
 	std::ofstream outputFile; // create an output file stream
 
 	try // try to open our file
@@ -523,11 +575,11 @@ void Game::saveScore()
 			
 			outputFile << scoreOutput; // write our string to file
 
-			outputFile.close(); // close our file again
+			outputFile.close(); // close our file
 		}
 		else // if it did not open successfully, throw an exception
 		{
-			throw std::exception("Exception when trying to open output file 'HIGHSCORES.txt'");
+			throw std::exception("Exception when trying to open file 'HIGHSCORES.txt' for data output");
 		}
 	}
 	// catch any exceptions of class std::exception
