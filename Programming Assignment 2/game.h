@@ -124,6 +124,9 @@ private:
 
 	gameState m_currentState; // current game state (menu/gameplay/gameover)
 
+	sf::Texture m_livesTexture;
+	sf::Sprite m_livesSprite;
+
 	sf::Font m_ArialBlackfont;
 	sf::Text m_HUDText; // displays information to the user (name/score/instructions)
 

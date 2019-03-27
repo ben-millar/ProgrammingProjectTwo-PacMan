@@ -17,7 +17,6 @@ Ghost::Ghost()
 	m_body.setFillColor(sf::Color::White);
 
 	m_moveSpeed = 1.0f;
-	m_vulnerable = false;
 
 	m_huntClock.restart();
 	m_huntDelay = sf::seconds(3.0f);
@@ -27,6 +26,7 @@ Ghost::Ghost()
 	m_currentState = ghostState::initial;
 
 	m_active = false;
+	m_vulnerable = false;
 }
 
 /// <summary>
@@ -41,8 +41,16 @@ Ghost::~Ghost()
 /// </summary>
 void Ghost::start()
 {
-	m_active = true;
-	m_currentState = ghostState::hunting;
+	m_currentState = ghostState::starting;
+}
+
+/// <summary>
+/// resets the ghost
+/// </summary>
+void Ghost::stop()
+{
+	m_currentState = ghostState::initial;
+	m_active = false;
 }
 
 /// <summary>
@@ -68,10 +76,34 @@ void Ghost::update(sf::Vector2i t_playerPos, Cell t_cellArray[][20])
 			}
 		}
 	}
-
+	else
+	{
+		if (m_moveDirection != direction::right)
+		{
+			changeDirection(direction::left, t_cellArray);
+		}
+	}
+	
 	if (m_currentState == ghostState::hunting)
 	{
 		hunt(t_playerPos, t_cellArray);
+	}
+	
+	if (m_currentState == ghostState::starting)
+	{
+		if (m_currentCell.x < 9)
+		{
+			changeDirection(direction::right, t_cellArray);
+		}
+		else if (m_currentCell.x > 11)
+		{
+			changeDirection(direction::right, t_cellArray);
+		}
+		else
+		{
+			changeDirection(direction::up, t_cellArray);
+			m_active = true;
+		}
 	}
 
 	move();

@@ -37,5 +37,6 @@ public:
 	inline sf::Vector2f getPosition() { return m_body.getPosition(); } // get position of player (in pixels)
 	inline sf::Vector2i getCell() { return m_currentCell; } // get players current cell (in terms of game cells)
 	inline int getLives() { return m_lives; } // returns the players current lives
+	inline void setLives(int t_lives) { m_lives = t_lives; } // set the players current lives
 	inline void setPosition(sf::Vector2f t_pos) { m_body.setPosition(t_pos); } // set the players position (in pixels)
 };

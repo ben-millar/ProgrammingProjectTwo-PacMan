@@ -187,7 +187,13 @@ void Game::setupSounds()
 
 void Game::setupSprites()
 {
+	if (!m_livesTexture.loadFromFile("ASSETS//IMAGES//pacmanSprite.png"))
+	{
+		std::cout << "Error loading m_livesTexture from ASSETS//IMAGES//pacmanSprite.png" << std::endl;
+	}
 
+	m_livesSprite.setTexture(m_livesTexture);
+	//m_livesSprite.setScale(0.5f, 0.5f);
 }
 
 
@@ -464,6 +470,15 @@ void Game::render()
 			m_HUDText.setString(m_playerNameString + "'s score: " + std::to_string(m_playerScore));
 			m_window.draw(m_HUDText);
 
+			// draw player lives
+			for (int i = 0; i < m_player.getLives(); i++)
+			{
+				sf::Vector2f iconPosition = { 450.0f + i * 40.0f, 680.0f }; // increase X-position each loop
+				m_livesSprite.setPosition(iconPosition);
+
+				m_window.draw(m_livesSprite);
+			}
+
 			for (int i = 0; i < NUM_GHOSTS; i++)
 			{
 				m_ghost[i].draw(m_window); // draw ghost
@@ -530,14 +545,19 @@ void Game::saveScore()
 /// </summary>
 void Game::softReset()
 {
-	// reset positions of all ghosts
+	// reset positions/state of all ghosts
 	for (int i = 0; i < NUM_GHOSTS; i++)
 	{
 		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
+		m_ghost[i].stop();
 	}
 
-	// reset position of player
+	// reset position/direction of player
 	m_player.setPosition(M_PLAYER_STARTING_POSITION);
+	m_player.changeDirection(direction::null, maze);
+
+	// restart ghost activation timer
+	m_ghostClock.restart();
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -548,9 +568,20 @@ void Game::softReset()
 /// </summary>
 void Game::hardReset()
 {
-	setupObjects(); // reset score and entity positions
 	setupMaze(); // reset maze array
 	m_player.changeDirection(direction::null, maze); // reset player direction
+	m_player.setLives(3); // reset player lives to 3
+	m_playerScore = 0; // reset player score
+
+	// restart ghost activation timer
+	m_ghostClock.restart();
+	
+	// reset ghost to its initial state
+	for (int i = 0; i < NUM_GHOSTS; i++)
+	{
+		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
+		m_ghost[i].stop();
+	}
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

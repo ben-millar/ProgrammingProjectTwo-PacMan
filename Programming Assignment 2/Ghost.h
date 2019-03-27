@@ -5,9 +5,10 @@
 
 enum class ghostState
 {
-	initial,
-	random,
-	hunting
+	initial, // moving left to right
+	starting, // moving out of ghost house
+	random, // random movement
+	hunting // following player
 };
 
 class Ghost
@@ -39,10 +40,12 @@ public:
 	Ghost();
 	~Ghost();
 
-	void start();
-	void update(sf::Vector2i t_playerPos, Cell t_cellArray[][20]);
-	void hunt(sf::Vector2i t_playerPos, Cell t_cellArray[][20]);
-	void hitWall(Cell t_cellArray[][20]);
+	void start(); // start the ghost moving out of the ghost house
+	void stop(); // reset the ghost to its initial state
+
+	void update(sf::Vector2i t_playerPos, Cell t_cellArray[][20]); // main update method
+	void hunt(sf::Vector2i t_playerPos, Cell t_cellArray[][20]); // move to the players position
+	void hitWall(Cell t_cellArray[][20]); // hit wall, try to change direction
 
 	inline void draw(sf::RenderWindow & t_window) { t_window.draw(m_body); }
 
