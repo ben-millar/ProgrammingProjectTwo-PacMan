@@ -36,9 +36,10 @@
 
 enum class gameState
 {
-	menu,
-	gameplay,
-	gameover
+	instructions,	// show player instructions
+	menu,			// taking player name
+	gameplay,		// main gameplay
+	gameover		// game over screen
 };
 
 struct scoreEntry
@@ -129,10 +130,25 @@ private:
 
 	sf::RenderWindow m_window; // main SFML window
 
+	// SOUNDS
+
+	sf::SoundBuffer m_introMusicBuffer;
+	sf::SoundBuffer m_pacmanEatingBuffer;
+	sf::SoundBuffer m_pacmanDeathBuffer;
+
+	sf::Sound m_introMusicSound;
+	sf::Sound m_pacmanEatingSound;
+	sf::Sound m_pacmanDeathSound;
+
+	// ++++++
+
 	gameState m_currentState; // current game state (menu/gameplay/gameover)
 
 	sf::Texture m_livesTexture;
 	sf::Sprite m_livesSprite;
+
+	sf::Texture m_instructionsTexture;
+	sf::Sprite m_instructionsSprite;
 
 	sf::Font m_ArialBlackfont;
 	sf::Text m_HUDText; // displays information to the user (name/score/instructions)

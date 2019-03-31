@@ -40,7 +40,7 @@ Game::Game() :
 	m_currentState = gameState::gameplay;
 	m_playerNameString = "Debug";
 #else
-	m_currentState = gameState::menu;
+	m_currentState = gameState::instructions;
 #endif
 	setupFontAndText(); // load font 
 	setupObjects(); // set sfml object parameters
@@ -104,6 +104,16 @@ void Game::processEvents()
 		// ++++++++ Checks gamestate and takes keyboard events as required ++++++++
 		switch (m_currentState)
 		{
+		// ++++ INSTRUCTIONS ++++
+		case gameState::instructions:
+			if (sf::Event::KeyPressed == event.type)
+			{
+				if (sf::Keyboard::Space == event.key.code)
+				{
+					m_currentState = gameState::menu;
+				}
+			}
+			break;
 		// ++++++++ MENU ++++++++
 		case gameState::menu: 
 
@@ -113,6 +123,7 @@ void Game::processEvents()
 				if (sf::Keyboard::Enter == event.key.code)
 				{
 					m_ghostClock.restart();
+					m_introMusicSound.play();
 					m_currentState = gameState::gameplay;
 				}
 			}
@@ -186,7 +197,26 @@ void Game::setupFontAndText()
 
 void Game::setupSounds()
 {
-	
+	if (!m_introMusicBuffer.loadFromFile("ASSETS//SOUNDS//pacman_beginning.wav"))
+	{
+		// error
+	}
+
+	m_introMusicSound.setBuffer(m_introMusicBuffer);
+
+	if (!m_pacmanEatingBuffer.loadFromFile("ASSETS//SOUNDS//pacman_chomp.wav"))
+	{
+		// error
+	}
+
+	m_pacmanEatingSound.setBuffer(m_pacmanEatingBuffer);
+
+	if (!m_pacmanDeathBuffer.loadFromFile("ASSETS//SOUNDS//pacman_death.wav"))
+	{
+		// error
+	}
+
+	m_pacmanDeathSound.setBuffer(m_pacmanDeathBuffer);
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -199,9 +229,16 @@ void Game::setupSprites()
 	}
 
 	m_livesSprite.setTexture(m_livesTexture);
-	//m_livesSprite.setScale(0.5f, 0.5f);
+	
+	if (!m_instructionsTexture.loadFromFile("ASSETS//IMAGES//instructions.png"))
+	{
+		std::cout << "Error loading m_instructionsTexture from ASSETS//IMAGES//instructions.png" << std::endl;
+	}
+
+	m_instructionsSprite.setTexture(m_instructionsTexture);
 }
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ///<summary>
 /// sets up attributes for all SFML objects
@@ -327,6 +364,11 @@ void Game::update(sf::Time t_deltaTime)
 
 		m_player.update(); // update player
 
+		//if (m_player.isMoving() == true && m_pacmanEatingSound.getStatus() != sf::Sound::Status::Playing)
+		//{
+		//	m_pacmanEatingSound.play();
+		//}
+
 		// for all ghosts
 		for (int i = 0; i < NUM_GHOSTS; i++)
 		{
@@ -408,6 +450,7 @@ void Game::checkCollisions()
 		if (m_player.getBounds().intersects(m_ghost[i].getBounds()))
 		{
 			m_player.kill(); // kill player
+			m_pacmanDeathSound.play();
 			softReset(); // perform a soft reset
 		}
 	}
@@ -450,6 +493,11 @@ void Game::render()
 
 	switch(m_currentState)
 	{
+		// ++ INSTRUCTIONS ++
+	case gameState::instructions:
+		m_window.draw(m_instructionsSprite);
+		break;
+
 		// ++++++ MENU ++++++
 		case gameState::menu:
 			// display instructions
@@ -645,6 +693,8 @@ void Game::hardReset()
 		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
 		m_ghost[i].stop();
 	}
+
+	m_introMusicSound.play();
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

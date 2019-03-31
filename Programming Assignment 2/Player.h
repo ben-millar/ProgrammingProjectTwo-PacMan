@@ -39,4 +39,5 @@ public:
 	inline int getLives() { return m_lives; } // returns the players current lives
 	inline void setLives(int t_lives) { m_lives = t_lives; } // set the players current lives
 	inline void setPosition(sf::Vector2f t_pos) { m_body.setPosition(t_pos); } // set the players position (in pixels)
+	inline bool isMoving() { return (m_moveDirection != direction::null) ? true : false; } // return true if moving, false if not
 };
