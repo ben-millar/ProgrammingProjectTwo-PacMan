@@ -43,8 +43,8 @@ enum class gameState
 
 struct scoreEntry
 {
-	std::string name;
-	int score;
+	std::string name = "";
+	int score = 0;
 };
 
 class Game
@@ -72,6 +72,8 @@ private:
 	void render(); // renders framebuffer
 
 	void saveScore(); // saves player score to a file
+	void readScores(); 
+	void writeScores();
 
 	void softReset(); // resets player and ghost positions after a player loses a life
 	void hardReset(); // resets game to its initial state after a game over
@@ -123,6 +125,8 @@ private:
 	int m_playerScore; // stores the players current score
 	const int m_pelletScore = 10;
 
+	int m_activeHighscores = 0;
+
 	// +++++++++++++++++++++++++++++
 
 	// ++++++++++ Objects ++++++++++
@@ -156,6 +160,9 @@ private:
 
 	// Array of cells
 	Cell maze[NUM_ROWS][NUM_COLS];
+
+	// Highscores table
+	scoreEntry m_highScores[10];
 
 	// +++++++++++++++++++++++++++++
 };

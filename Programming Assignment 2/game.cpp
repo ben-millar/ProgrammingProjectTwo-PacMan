@@ -520,13 +520,25 @@ void Game::render()
 /// </summary>
 void Game::saveScore()
 {
-	scoreEntry newEntry;
-
-	newEntry.name = m_playerNameString;
-	newEntry.score = m_playerScore;
 
 	// +++++ READ IN HIGHSCORE TABLE +++++
 
+	readScores();
+
+	// +++++ SORT SCORES BY VALUE +++++
+
+	// +++++ OUTPUT OUR NEW SCORE TABLE +++++
+
+	writeScores();
+
+	
+}
+
+/// <summary>
+/// Here we parse the HIGHSCORES file, and save the scores to temporary structs
+/// </summary>
+void Game::readScores()
+{
 	std::ifstream inputFile;
 
 	try
@@ -537,8 +549,11 @@ void Game::saveScore()
 		{
 			// create temp variables to hold the data 
 			// we're reading in from the file
-			std::string inputLine = ""; 
-			int newScore = 0;
+			std::string inputLine = "", tempInt = "";
+			int newScore = 0, scoreIndex = 0;
+
+			// true when we're reading an int from file
+			bool takingInt = false; 
 
 			// while we're not at the end of file
 			while (!inputFile.eof())
@@ -548,30 +563,58 @@ void Game::saveScore()
 
 				int len = inputLine.length();
 
-				for (int i = 0; i < len; i++) // for our whole string
+				// for our whole string
+				for (int i = 0; i < len; i++) 
 				{
-
+					// if we're taking in the name
+					if (!takingInt)
+					{
+						if (inputLine[i] != ':')
+						{
+							m_highScores[scoreIndex].name += inputLine[i];
+						}
+						else // we've reached delimiter
+						{
+							takingInt = true;
+							continue;
+						}
+					}
+					else
+					{
+						// take in score value
+						tempInt += inputLine[i];
+					}
 				}
-			}
+
+				// parse our score string into an int
+				m_highScores[scoreIndex].score = std::stoi(tempInt);
+				scoreIndex++;
+				m_activeHighscores++;
+				takingInt = false;
+
+			} // end while
 
 			inputFile.close(); // close our input file
-
-			// +++++ SORT SCORES BY VALUE +++++
-
 		}
-		else
+		else // if unable to open file
 		{
 			throw std::exception("Exception when trying to open file 'HIGHSCORES.txt' for data input");
 		}
 	}
 
+	// catch exceptions
 	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
 	}
+}
 
-	// +++++ OUTPUT OUR NEW SCORE TABLE +++++
 
+/// <summary>
+/// Here we run through our score structs and write them all to the highscores file
+/// </summary>
+void Game::writeScores()
+{
 	std::ofstream outputFile; // create an output file stream
 
 	try // try to open our file
@@ -582,10 +625,16 @@ void Game::saveScore()
 		{
 			std::cout.flush(); // flush data from the output stream before we write
 
-			std::string scoreOutput = m_playerNameString + ": " + std::to_string(m_playerScore) + "\n"; // assemble our string
-			
-			outputFile << scoreOutput; // write our string to file
+			std::string scoreOutput = m_playerNameString + ":" + std::to_string(m_playerScore) + "\n"; // assemble our string
 
+			for (int i = 0; i < m_activeHighscores; i++)
+			{
+				std::string scoreOutput = m_highScores[i].name + ":" + std::to_string(m_highScores[i].score) + "\n"; // assemble our string
+
+				outputFile << scoreOutput; // write our string to file
+			}
+
+			m_activeHighscores = 0;
 			outputFile.close(); // close our file
 		}
 		else // if it did not open successfully, throw an exception
@@ -594,7 +643,7 @@ void Game::saveScore()
 		}
 	}
 	// catch any exceptions of class std::exception
-	catch(std::exception e) 
+	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
 	}
