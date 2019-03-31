@@ -2,10 +2,10 @@
 /// Author: Ben Millar – C00236772
 /// Date: 01/03/2019
 /// 
-/// Description:
-/// 
-/// 
-/// 
+/// Description: A pacman clone where the player must navigate a 2D maze
+/// collecting pellets, whilst FOUR ghost enemies try to catch the player.
+/// The player wins the game if they collect all the pellets, and the player
+/// loses if they are caught by the ghosts
 /// 
 /// Estimated time to complete: 12 hours
 /// Session 1 Start: 18:45 End: 19:45
@@ -14,8 +14,14 @@
 /// Session 4 Start: 14:30 End: 15:30 
 /// Session 5 Start: 16:45 End: 17:10
 /// Session 6 Start: 18:00 End: 18:45
-/// Session 7 Start: 15:15 End: 16:30 TOTAL TIME: 7:25
+/// Session 7 Start: 15:15 End: 16:30 
+/// Session 8 Start: 13:30 End: 14:05 TOTAL TIME: 8:00
 /// </summary>
+
+// TO DO: Cells should have their own texture which they draw as appropriate; draw call should be sent to cells in render function.
+// No drawing (of maze) should be done in the game.cpp -- DONE --
+
+// Collision detection should be refactored to be based entirely off of cell information rather than getGlobalBounds. -- Not done, but improved --
 
 #include "game.h"
 #include "GLOBALS.h"
@@ -225,10 +231,10 @@ void Game::setupObjects()
 		m_ghost[i].setPosition(M_GHOST_STARTING_POSITION[i]);
 	}
 
-	m_ghost[0].setColor(sf::Color::Red);
-	m_ghost[1].setColor(sf::Color(255,128,0,255));
-	m_ghost[2].setColor(sf::Color::Cyan);
-	m_ghost[3].setColor(sf::Color(255, 192, 192, 255));
+	m_ghost[0].setColor(ghostColor::red);
+	m_ghost[1].setColor(ghostColor::orange);
+	m_ghost[2].setColor(ghostColor::blue);
+	m_ghost[3].setColor(ghostColor::pink);
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -288,8 +294,13 @@ void Game::inputText(sf::Event t_event, std::string & t_string, unsigned t_maxCh
 	// otherwise, if not backspace, and string not full
 	else if (t_string.length() < t_maxChars)
 	{
-		// append unicode char typed to string
-		t_string += t_event.text.unicode; 
+		// if text entered contains alphabetic characters
+		if ((t_event.text.unicode >= 'a' && t_event.text.unicode <= 'z') ||
+			(t_event.text.unicode >= 'A' && t_event.text.unicode <= 'Z'))
+		{
+			// append unicode char typed to string
+			t_string += t_event.text.unicode;
+		}
 	}
 }
 

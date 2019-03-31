@@ -11,10 +11,21 @@ enum class ghostState
 	hunting // following player
 };
 
+enum class ghostColor
+{
+	red, 
+	blue,
+	orange,
+	pink,
+	scared,
+	null
+};
+
 class Ghost
 {
 	sf::Texture m_texture;
 	sf::Sprite m_sprite;
+	sf::IntRect m_textureRect{ 0,0,30,32 };
 
 	void setupSprite();
 	sf::CircleShape m_body; // players body
@@ -47,12 +58,12 @@ public:
 	void hunt(sf::Vector2i t_playerPos, Cell t_cellArray[][20]); // move to the players position
 	void hitWall(Cell t_cellArray[][20]); // hit wall, try to change direction
 
-	inline void draw(sf::RenderWindow & t_window) { t_window.draw(m_body); }
+	void setColor(ghostColor t_color);
+	inline void draw(sf::RenderWindow & t_window) { m_sprite.setPosition(m_body.getPosition()); t_window.draw(m_sprite); }
 
 	// +++++ inline get/set functions +++++
 	inline bool isActive() { return m_active; }
 	inline sf::FloatRect getBounds() { return m_body.getGlobalBounds(); }
-	inline void setColor(sf::Color t_color) { m_body.setFillColor(t_color); }
 	inline void setPosition(sf::Vector2f t_pos) { m_body.setPosition(t_pos); }
 	inline sf::Vector2i getCell() { return m_currentCell; }
 };

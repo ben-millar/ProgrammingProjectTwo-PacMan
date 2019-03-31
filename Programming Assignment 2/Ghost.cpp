@@ -1,10 +1,19 @@
 #include "Ghost.h"
+#include <iostream>
 
 /// <summary>
 /// Sets up ghost sprite and texture
 /// </summary>
 void Ghost::setupSprite()
 {
+	if (!m_texture.loadFromFile("ASSETS//IMAGES//ghostTextures.png"))
+	{
+		std::cout << "Unable to load m_texture for Ghost class, located at 'ASSETS//IMAGES//ghostTexture.png'" << std::endl;
+	}
+
+	m_sprite.setTexture(m_texture);
+	m_sprite.setOrigin({ 15.0f,16.0f });
+	m_sprite.setTextureRect(m_textureRect);
 }
 
 /// <summary>
@@ -12,19 +21,27 @@ void Ghost::setupSprite()
 /// </summary>
 Ghost::Ghost()
 {
+	// set up our sprite
+	setupSprite();
+
+	// set up SF circle body
 	m_body.setRadius(16.0f);
 	m_body.setOrigin({ 16.0f,16.0f });
 	m_body.setFillColor(sf::Color::White);
 
+	// set moveSpeed to 1
 	m_moveSpeed = 1.0f;
 
+	// restart our state clock (used to switch movement states)
 	m_huntClock.restart();
 	m_huntDelay = sf::seconds(3.0f);
 	m_huntTimer = sf::seconds(1.0f);
 
+	// initialise movement direction and AI state
 	m_moveDirection = direction::left;
 	m_currentState = ghostState::initial;
 
+	// start inactive (in ghost house) and not vulnerable
 	m_active = false;
 	m_vulnerable = false;
 }
@@ -147,26 +164,22 @@ void Ghost::hunt(sf::Vector2i t_playerPos, Cell t_cellArray[][20])
 }
 
 /// <summary>
-/// Moves the ghost in its move direction, and rotates its sprite accordingly
+/// Moves the ghost in its move direction, by its move speed
 /// </summary>
 void Ghost::move()
 {
 	switch (m_moveDirection)
 	{
 	case direction::up:
-		m_sprite.setRotation(270.0f);
 		m_body.move(0, -m_moveSpeed);
 		break;
 	case direction::down:
-		m_sprite.setRotation(90.0f);
 		m_body.move(0, m_moveSpeed);
 		break;
 	case direction::left:
-		m_sprite.setRotation(180.0f);
 		m_body.move(-m_moveSpeed, 0);
 		break;
 	case direction::right:
-		m_sprite.setRotation(0.0f);
 		m_body.move(m_moveSpeed, 0);
 		break;
 	default:
@@ -243,6 +256,38 @@ void Ghost::hitWall(Cell t_cellArray[][20])
 			}
 		}
 	}
+}
+
+void Ghost::setColor(ghostColor t_color)
+{
+	switch(t_color)
+	{
+	case ghostColor::red:
+		m_body.setFillColor(sf::Color::Red);
+		m_textureRect = { 0,0,30,32 };
+		break;
+	case ghostColor::blue:
+		m_body.setFillColor(sf::Color::Blue);
+		m_textureRect = { 30,0,30,32 };
+		break;
+	case ghostColor::orange:
+		m_body.setFillColor(sf::Color(255,255,128,255));
+		m_textureRect = { 0,32,30,32 };
+		break;
+	case ghostColor::pink:
+		m_body.setFillColor(sf::Color(255,192,192,255));
+		m_textureRect = { 30,32,30,32 };
+		break;	
+	case ghostColor::scared:
+		m_body.setFillColor(sf::Color::Blue);
+		m_textureRect = { 0,64,30,32 };
+		break;
+	default:
+		std::cout << "Error setting ghost color in Ghost::setColor" << std::endl;
+		break;
+	}
+
+	m_sprite.setTextureRect(m_textureRect);
 }
 
 /// <summary>
