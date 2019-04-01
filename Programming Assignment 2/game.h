@@ -144,6 +144,9 @@ private:
 
 	gameState m_currentState; // current game state (menu/gameplay/gameover)
 
+	sf::Texture m_backgroundTexture;
+	sf::Sprite m_backgroundSprite;
+
 	sf::Texture m_livesTexture;
 	sf::Sprite m_livesSprite;
 

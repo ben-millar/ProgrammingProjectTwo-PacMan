@@ -66,6 +66,7 @@ void Ghost::start()
 /// </summary>
 void Ghost::stop()
 {
+	m_huntClock.restart();
 	m_currentState = ghostState::initial;
 	m_active = false;
 }

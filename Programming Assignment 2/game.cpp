@@ -223,6 +223,13 @@ void Game::setupSounds()
 
 void Game::setupSprites()
 {
+	if (!m_backgroundTexture.loadFromFile("ASSETS//IMAGES//maze.png"))
+	{
+		std::cout << "Error loading m_backgroundTexture from ASSETS//IMAGES//maze.png" << std::endl;
+	}
+
+	m_backgroundSprite.setTexture(m_backgroundTexture);
+
 	if (!m_livesTexture.loadFromFile("ASSETS//IMAGES//pacmanSprite.png"))
 	{
 		std::cout << "Error loading m_livesTexture from ASSETS//IMAGES//pacmanSprite.png" << std::endl;
@@ -515,11 +522,14 @@ void Game::render()
 
 		// ++++ GAMEPLAY ++++
 		case gameState::gameplay:
+
+			m_window.draw(m_backgroundSprite);
+
 			for (int i = 0; i < NUM_ROWS; i++) // for all rows
 			{
 				for (int j = 0; j < NUM_COLS; j++) // for all columns
 				{
-					maze[i][j].draw(m_window);
+					maze[i][j].draw(m_window); // draw pellets
 				}
 			}
 

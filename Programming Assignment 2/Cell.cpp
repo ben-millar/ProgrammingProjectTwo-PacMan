@@ -46,15 +46,13 @@ void Cell::draw(sf::RenderWindow & t_window)
 	{
 	case cellType::wall:
 		m_wall.setPosition({ m_position.x*CELL_SIZE.x, m_position.y*CELL_SIZE.y });
-		t_window.draw(m_wall);
 		break;
 	case cellType::pellet:
 		m_pellet.setPosition({ m_position.x*CELL_SIZE.x, m_position.y*CELL_SIZE.y });
-		t_window.draw(m_pellet);
+		t_window.draw(m_pellet); // only draw pellets over the background
 		break;
 	case cellType::door:
 		m_door.setPosition({ m_position.x*CELL_SIZE.x, m_position.y*CELL_SIZE.y });
-		t_window.draw(m_door);
 		break;
 	default:
 		break;
